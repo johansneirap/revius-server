@@ -5,12 +5,13 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -34,10 +35,36 @@ export class AuthController {
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
-  facebookCallback(@Req() req: Request) {
+  facebookCallback(@Req() req: Request, @Res() res: Response) {
     const { user } = req;
 
     //TODO: Register the user in the database
-    return user;
+    // return user;
+    res.cookie('revius-auth-user', JSON.stringify(user), {
+      httpOnly: true,
+      secure: true,
+    });
+    res.redirect('http://localhost:3000');
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  google() {
+    return HttpStatus.OK;
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleCallback(@Req() req: Request, @Res() res: Response) {
+    const { user } = req;
+
+    //TODO: Register the user in the database
+    // return user;
+    console.log(user);
+    res.cookie('revius-auth-user', JSON.stringify(user), {
+      httpOnly: true,
+      secure: true,
+    });
+    res.redirect('http://localhost:3000');
   }
 }
